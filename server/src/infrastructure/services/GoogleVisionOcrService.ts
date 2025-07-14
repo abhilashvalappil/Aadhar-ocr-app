@@ -18,34 +18,21 @@
 // }
 
 import { ImageAnnotatorClient } from '@google-cloud/vision';
-import path from 'path';
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 export class GoogleVisionOCRService {
   private client: ImageAnnotatorClient;
 
   constructor() {
-    let clientConfig: any = {};
+    const credentialsString = process.env.GOOGLE_CREDENTIAL_JSON;
 
-    if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON_BASE64) {
-      // Production: Use base64 credentials
-      const credentialsJson = Buffer.from(
-        process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON_BASE64, 
-        'base64'
-      ).toString('utf-8');
-      
-      const credentials = JSON.parse(credentialsJson);
-      clientConfig = {
-        credentials: credentials,
-        projectId: credentials.project_id
-      };
-    } else {
-      // Development: Use file
-      clientConfig = {
-        keyFilename: path.join(__dirname, '../config/credentials/aadhaar-ocr-service.json'),
-      };
-    }
+    if (!credentialsString) throw new Error('Google credentials not found in env');
 
-    this.client = new ImageAnnotatorClient(clientConfig);
+    const credentials = JSON.parse(credentialsString);
+
+    this.client = new ImageAnnotatorClient({ credentials });
   }
 
   async extractTextFromBuffer(buffer: Buffer): Promise<string> {
