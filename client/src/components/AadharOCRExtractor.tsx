@@ -12,6 +12,7 @@ import {
   extractAddress,
   extractPincode
 } from '../utils/aadharExtractors';
+import isValidAadharText from "../utils/isValidAadhar";
 
 
 const AadharOCRExtractor: React.FC = () => {
@@ -47,6 +48,22 @@ const AadharOCRExtractor: React.FC = () => {
     setLoading(true);
 
     const response = await fetchDataFromAadharPhotos(formData);
+
+     if (!response || !response.frontText || !response.backText) {
+      showErrorToast("Could not extract Aadhaar details");
+      setLoading(false);
+      return;
+    }
+
+    // Aadhaar validation
+    const isAadharFront = isValidAadharText(response.frontText);
+    const isAadharBack = isValidAadharText(response.backText);
+
+    if (!isAadharFront || !isAadharBack) {
+      showErrorToast("Uploaded images do not appear to be Aadhaar cards");
+      setLoading(false);
+      return;
+    }
     
      if (response && response.frontText && response.backText) {
       setAadharData({
@@ -60,16 +77,6 @@ const AadharOCRExtractor: React.FC = () => {
     }
     setLoading(false);
   };
-
-  // const handleSave = () => {
-  //   localStorage.setItem("aadharData", JSON.stringify(aadharData));
-  //   alert("Data saved successfully!");
-  // };
-
-  // const handleRetrieve = () => {
-  //   const data = localStorage.getItem("aadharData");
-  //   if (data) setAadharData(JSON.parse(data));
-  // };
 
   const handleClear = () => {
     setFrontImage(null);

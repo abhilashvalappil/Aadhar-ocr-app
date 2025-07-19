@@ -7,7 +7,7 @@ console.log('CLIENT_URI:', process.env.CLIENT_URI);
 
 const app = express();
 app.use(cors({
-  origin: 'https://aadhar-ocr-app.vercel.app',
+  origin: process.env.CLIENT_URI, 
   credentials: true
 }));
 app.use(express.json());
